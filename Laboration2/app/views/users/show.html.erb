@@ -1,0 +1,17 @@
+<% if current_user && @key %>
+    <h3>API Key:</h3>
+    <%= @key.key %>
+    <p><%= link_to "Delete", @key.user, method: :delete %></p>
+
+    <% elsif current_user.admin? %>
+    <ul>
+      <!-- Loopar igenom alla användare som har en nyckel -->
+        <% @all_users.each do |i| %>
+
+            <li><%= i.user.name %>, <%= i.key %><%= link_to "Delete", i.user, method: :delete %></li>
+        <% end %>
+    </ul>
+    <% else %>
+    <%= link_to "New key", @user, method: :post %>
+<% end %>
+

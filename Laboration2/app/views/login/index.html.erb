@@ -1,0 +1,22 @@
+<% # replace the yeild for title in application.html.erb %>
+<% content_for :title do %>
+    Välkommen - Logga in
+<% end %>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+    <%= form_for(:login, url: login_path) do |f| %>
+
+        <%= f.label :email %>
+        <%= f.email_field :name, class: 'form-control' %>
+
+        <%= f.label :password %>
+        <%= f.password_field :password, class: 'form-control' %>
+        <br />
+        <%= f.submit "Log in", class: "btn btn-primary" %>
+
+        <%= link_to "Register", register_path %>
+    <% end %>
+
+  </div>
+</div>
