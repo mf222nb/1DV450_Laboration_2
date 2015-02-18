@@ -5,4 +5,5 @@ class ApplicationController < ActionController::Base
 
   #Inkluderar helper klassen LoginHelper
   include LoginHelper
+  include ErrorsHelper
 end

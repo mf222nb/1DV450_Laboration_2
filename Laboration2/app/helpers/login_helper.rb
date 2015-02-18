@@ -27,4 +27,22 @@ module LoginHelper
       redirect_to login_path
     end
   end
+
+  ##API helpers, Laboration 2
+
+  def api_authentication
+    if request.headers['Authorization'].present?
+
+      auth_header = request.headers['Authorization'].split(' ').last
+
+      key = Key.find_by_key(auth_header)
+
+      if key == nil || key.key != auth_header
+        render json: {error: 'The provided token wasn´t correct'}, status: :bad_request
+      end
+    else
+      render json: {error: 'Need to include the Authorization header'}, status: :forbidden
+    end
+  end
+
 end
