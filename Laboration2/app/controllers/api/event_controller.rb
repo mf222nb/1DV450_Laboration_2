@@ -9,7 +9,12 @@ class Api::EventController < ApplicationController
 
   def index
     @events = Event.all.order(created_at: :desc)
-
+    if offset_params.present?
+      @events = Event.limit(@limit).offset(@offset).order(created_at: :desc)
+      else if params[:query].present?
+          @events = Event.where("description")
+      end
+    end
     if @events.empty?
       @error = ErrorMessage.new("Could not find the Events", "There is no Events to be shown")
       respond_with @error, status: :ok
@@ -30,10 +35,15 @@ class Api::EventController < ApplicationController
 
   def create
     event = Event.new(event_params)
-    if event.save
+    tag = Tag.new(tag_params)
+    if Tag.find_by_name(tag.name).present?
+      tag = Tag.find_by_name(tag.name)
+    end
+    event.tags << tag
+      if event.save && tag.save
       respond_with event, location: url_for([:api, event]), status: :created
     else
-      error = ErrorMessage.new("Could not find that Event. Are you using the right event_id?", "Something went wrong")
+      error = ErrorMessage.new("Could not create the Event", "Something went wrong")
       respond_with error, status: :bad_request
     end
   end
@@ -65,11 +75,33 @@ class Api::EventController < ApplicationController
     error = ErrorMessage.new("Could not find that Event. Are you using the right event_id?", "The Event was not found!")
     render json: error, status: :not_found
 
+  end
+
+  # This method is using the geocoder and helps with searching near a specific position
+  def nearby
+
+    # Check the parameters
+    if params[:long].present? && params[:lat].present?
+
+      # using the parameters and offset/limit
+      position = Position.near([params[:long].to_f, params[:lat].to_f], 20).limit(@limit).offset(@offset)
+
+      respond_with position.map(&:events), status: :ok
+    else
+
+      error = ErrorMessage.new("Could not find any resources. Bad parameters?", "Could not find any events!" )
+      render json: error, status: :bad_request # just json in this example
+    end
 
   end
 
   private
   def event_params
     params.require(:event).permit(:creator_id, :position_id, :description)
+  end
+
+  private
+  def tag_params
+    params.require(:tags).permit(:name)
   end
 end

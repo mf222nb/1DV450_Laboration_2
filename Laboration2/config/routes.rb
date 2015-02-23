@@ -24,13 +24,14 @@ Rails.application.routes.draw do
   get '/delete' => 'users#destroy'
   resources :users, only: [:show, :destroy]
   get '/logout' => 'login#destroy'
-
+  get 'api/event/nearby' => 'api/event#nearby'
 
   #API routes
   namespace :api do
     resources :event
     resources :tag
     resources :creator
+
     get '/creator/:name' => 'creator#search'
   end
 
