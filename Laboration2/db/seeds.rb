@@ -10,3 +10,7 @@ User.create!(name: "admin@admin.com",
              password:              "password",
              password_confirmation: "password",
              admin: true)
+
+Creator.create!(name: "Steve",
+                password: "qwerty",
+                password_confirmation: "qwerty")

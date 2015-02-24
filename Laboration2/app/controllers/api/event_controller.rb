@@ -5,28 +5,32 @@ class Api::EventController < ApplicationController
   rescue_from ActionController::UnknownFormat, with: :raise_bad_format
   protect_from_forgery with: :null_session
 
+  before_action :user_authenticate, only: [:create]
   before_action :api_authentication
+
 
   def index
     @events = Event.all.order(created_at: :desc)
     if offset_params.present?
       @events = Event.limit(@limit).offset(@offset).order(created_at: :desc)
-      else if params[:query].present?
-          @events = Event.where("description")
-      end
     end
+
+    if params[:query].present?
+      @events = Event.where("description LIKE ?", "%#{params[:query]}%")
+    end
+
     if @events.empty?
       @error = ErrorMessage.new("Could not find the Events", "There is no Events to be shown")
       respond_with @error, status: :ok
     else
-      respond_with @events
+      respond_with @events, status: :ok
     end
 
   end
 
   def show
     @event = Event.find(params[:id])
-    respond_with @event
+    respond_with @event, status: :ok
 
   rescue ActiveRecord::RecordNotFound
     error = ErrorMessage.new("Could not find that Event. Are you using the right event_id?", "The Event was not found!")
@@ -35,6 +39,7 @@ class Api::EventController < ApplicationController
 
   def create
     event = Event.new(event_params)
+    event.creator_id = @creator_id
     tag = Tag.new(tag_params)
     if Tag.find_by_name(tag.name).present?
       tag = Tag.find_by_name(tag.name)
@@ -97,7 +102,7 @@ class Api::EventController < ApplicationController
 
   private
   def event_params
-    params.require(:event).permit(:creator_id, :position_id, :description)
+    params.require(:event).permit(:position_id, :description)
   end
 
   private

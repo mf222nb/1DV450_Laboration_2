@@ -30,13 +30,4 @@ class LoginController < ApplicationController
     flash[:success] = 'You have logged out'
     redirect_to root_url
   end
-
-  def api_auth
-    user = User.find_by_name(name: params[:name].downcase)
-
-    if user && user.authenticate(params[:password])
-    else
-      render json: { error: 'Invalid username or password' }, status: :unauthorized
-    end
-  end
 end

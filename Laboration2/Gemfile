@@ -30,6 +30,8 @@ gem 'bootstrap-sass'
 
 gem 'geocoder'
 
+gem 'jwt'
+
 # Use unicorn as the app server
 # gem 'unicorn'
 

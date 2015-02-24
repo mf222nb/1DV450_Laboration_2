@@ -45,4 +45,43 @@ module LoginHelper
     end
   end
 
+  def user_authenticate
+    if request.headers["Userkey"].present?
+      # Take the last part in The header (ignore Bearer)
+      auth_header = request.headers['Userkey'].split(' ').last
+      # Are we feeling alright!?
+      @token_payload = decodeJWT auth_header.strip
+      if @token_payload
+        @creator_id = @token_payload[0]['creator_id']
+      end
+    else
+      render json: { error: 'Need to include the Userkey header' }, status: :forbidden # The header isn´t present
+    end
+  end
+
+  def encodeJWT(creator, exp=2.hours.from_now)
+    # add the expire to the payload, as an integer
+    payload = { creator_id: creator.id }
+    payload[:exp] = exp.to_i
+
+    # Encode the payload whit the application secret, and a more advanced hash method (creates header with JWT gem)
+    JWT.encode( payload, Rails.application.secrets.secret_key_base, "HS512")
+
+  end
+
+  def decodeJWT(token)
+    # puts token
+    payload = JWT.decode(token, Rails.application.secrets.secret_key_base, "HS512")
+    # puts payload
+    if payload[0]["exp"] >= Time.now.to_i
+      payload
+    else
+      puts "time fucked up"
+      false
+    end
+      # catch the error if token is wrong
+  rescue => error
+    puts error
+    nil
+  end
 end

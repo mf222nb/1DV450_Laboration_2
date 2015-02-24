@@ -1,5 +1,7 @@
 class Api::CreatorController < ApplicationController
 
+  protect_from_forgery with: :null_session
+
   respond_to :json, :xml
 
   before_action :api_authentication
@@ -31,5 +33,15 @@ class Api::CreatorController < ApplicationController
     creator = Creator.find_by_name(params[:name])
     creator_events = creator.events
     respond_with creator_events
+  end
+
+  def api_auth
+    creator = Creator.find_by(name: request.headers[:name])
+
+    if creator && creator.authenticate(request.headers[:password])
+      render json: { auth_token: encodeJWT(creator) }
+    else
+      render json: { error: 'Invalid username or password' }, status: :unauthorized
+    end
   end
 end

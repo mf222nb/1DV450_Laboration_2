@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   resources :users, only: [:show, :destroy]
   get '/logout' => 'login#destroy'
   get 'api/event/nearby' => 'api/event#nearby'
+  post '/auth' => 'api/creator#api_auth'
 
   #API routes
   namespace :api do
