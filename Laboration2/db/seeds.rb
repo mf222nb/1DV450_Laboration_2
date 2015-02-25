@@ -14,3 +14,28 @@ User.create!(name: "admin@admin.com",
 Creator.create!(name: "Steve",
                 password: "qwerty",
                 password_confirmation: "qwerty")
+
+Creator.create!(name: "Jonas",
+                password: "qwerty",
+                password_confirmation: "qwerty")
+
+Creator.create!(name: "Pelle",
+                password: "qwerty",
+                password_confirmation: "qwerty")
+
+Key.create!(user_id: 1,
+            key: "12345")
+
+Position.create!(long: 16.3,
+                 lat: 28.4)
+
+Position.create!(long: 23.4,
+                 lat: 32.25)
+
+Tag.create!(name: "tennis")
+Tag.create!(name: "sport")
+
+Event.create!(tags: Tag.all,
+              creator_id: 1,
+              position_id: 1,
+              description: "Tennistävling")
