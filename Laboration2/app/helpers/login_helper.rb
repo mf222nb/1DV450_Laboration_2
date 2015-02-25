@@ -30,9 +30,10 @@ module LoginHelper
 
   ##API helpers, Laboration 2
 
+  #Kontrollerar om en användare skickar med en giltig API-nyckel
   def api_authentication
     if request.headers['Authorization'].present?
-
+      #Tar den sista delen i headern
       auth_header = request.headers['Authorization'].split(' ').last
 
       key = Key.find_by_key(auth_header)
@@ -45,11 +46,12 @@ module LoginHelper
     end
   end
 
+  #Kontrollerar så att en användare skickar med en token
   def user_authenticate
     if request.headers["Userkey"].present?
-      # Take the last part in The header (ignore Bearer)
+      #Tar den sista delen i headern
       auth_header = request.headers['Userkey'].split(' ').last
-      # Are we feeling alright!?
+
       @token_payload = decodeJWT auth_header.strip
       if @token_payload
         @creator_id = @token_payload[0]['creator_id']
@@ -59,27 +61,28 @@ module LoginHelper
     end
   end
 
+  #Skapar en JSON Web Token som har en längd på 2 timmar
   def encodeJWT(creator, exp=2.hours.from_now)
-    # add the expire to the payload, as an integer
+    #Binder token till en viss användare
     payload = { creator_id: creator.id }
     payload[:exp] = exp.to_i
 
-    # Encode the payload whit the application secret, and a more advanced hash method (creates header with JWT gem)
+    #Encode the payload whit the application secret, and a more advanced hash method (skapar header med JWT gem)
     JWT.encode( payload, Rails.application.secrets.secret_key_base, "HS512")
 
   end
 
+  #Tar emot och dekrypterar en token
   def decodeJWT(token)
-    # puts token
     payload = JWT.decode(token, Rails.application.secrets.secret_key_base, "HS512")
-    # puts payload
+    #Kontrollerar tiden på token
     if payload[0]["exp"] >= Time.now.to_i
       payload
     else
-      puts "time fucked up"
+      puts "The token has expired, please log in again to get a new one"
       false
     end
-      # catch the error if token is wrong
+      #Fångar felet om token var fel
   rescue => error
     puts error
     nil

@@ -4,10 +4,11 @@ class Api::CreatorController < ApplicationController
 
   respond_to :json, :xml
 
-  before_action :api_authentication
+  before_action :api_authentication, only: [:index, :show]
 
   rescue_from ActionController::UnknownFormat, with: :raise_bad_format
 
+  #Visar alla avändare som finns
   def index
     creator = Creator.all
 
@@ -19,6 +20,7 @@ class Api::CreatorController < ApplicationController
     end
   end
 
+  #Visar alla events som finns på en viss användare
   def show
     creator = Creator.find(params[:id])
     creator_events = creator.events
@@ -29,12 +31,7 @@ class Api::CreatorController < ApplicationController
     respond_with @error, status: :not_found
   end
 
-  def search
-    creator = Creator.find_by_name(params[:name])
-    creator_events = creator.events
-    respond_with creator_events
-  end
-
+  #Skapar en JSON Web Token till en användare, om man har en inloggning
   def api_auth
     creator = Creator.find_by(name: request.headers[:name])
 

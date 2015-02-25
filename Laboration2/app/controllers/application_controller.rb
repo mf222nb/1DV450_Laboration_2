@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   include ErrorsHelper
 
 
-
+  #Tittar om parametrarna offset eller limit finns och gör om dem till int
   def offset_params
     if params[:offset].present?
       @offset = params[:offset].to_i

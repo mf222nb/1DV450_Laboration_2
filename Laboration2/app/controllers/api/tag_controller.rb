@@ -2,9 +2,11 @@ class Api::TagController < ApplicationController
 
   protect_from_forgery with: :null_session
   rescue_from ActionController::UnknownFormat, with: :raise_bad_format
-  before_action :api_authentication
+  before_action :api_authentication, only: [:index, :show]
+  before_action :user_authenticate, only: [:create]
   respond_to :json, :xml
 
+  #Visar alla taggar
   def index
     tags = Tag.all
     if offset_params.present?
@@ -18,6 +20,7 @@ class Api::TagController < ApplicationController
     end
   end
 
+  #Visar alla event som finns på en viss tag
   def show
     tag = Tag.find(params[:id])
     tag_events = tag.events
@@ -28,6 +31,7 @@ class Api::TagController < ApplicationController
     respond_with @error, status: :not_found
   end
 
+  #Skapar en tag
   def create
 
     tag = Tag.new(tag_params)
