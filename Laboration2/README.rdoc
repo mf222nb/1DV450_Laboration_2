@@ -11,9 +11,9 @@ In the terminal do rake db:mograte to get the necessary tables and after that do
 user.
 
 * Installation
-1. När du öppnat applikationen så skriver du i terminalen bundle install för att få in gems du kanske missat.
+1. När du öppnat applikationen så skriver du i terminalen bundle install för att få in gems du kanske missar.
 2. För att skapa databasen skriver du "rake db:migrate".
-3. För att få in en Admin användare skriver du "rake db:seed".
-4. Nu kan du köra igång applikationen.
-
-Admins inloggningsuppgifter är Admin@admin.com och lösenord är password
+3. För att få in lite dummy - data skriver du "rake db:seed".
+4. Ta filen som ligger under roten för detta repositoryt som heter Postman_Laboration2.json.txt och importera till Postman
+5. Nu kan du testa de get/post/put/delete som jag gjort i postman.
+6. Troligen måste ett nytt JSON Web Token genereras innan man kan göra post/put/delete. Detta görs på post user Auth.
