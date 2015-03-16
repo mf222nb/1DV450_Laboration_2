@@ -45,13 +45,15 @@ class Api::EventController < ApplicationController
     event = Event.new(event_params)
     event.creator_id = @creator_id
     tag = Tag.new(tag_params)
+    position = Position.new(position_params)
 
     if Tag.find_by_name(tag.name.downcase).present?
       tag = Tag.find_by_name(tag.name.downcase)
     end
 
     event.tags << tag
-    if event.save && tag.save
+    event.position = position
+    if event.save && tag.save && position.save
       respond_with event, location: url_for([:api, event]), status: :created
     else
       error = ErrorMessage.new("Could not create the Event", "Something went wrong")
@@ -65,34 +67,39 @@ class Api::EventController < ApplicationController
 
     new_event = Event.new(event_params)
 
-    event.position_id = new_event.position_id
-    event.description = new_event.description
+    if new_event.position_id != nil
+      event.position_id = new_event.position_id
+    end
 
-    event.save
+    if event.creator_id == @creator_id
+      event.title = new_event.title
+      event.description = new_event.description
 
-    render json: event, status: :ok
+      if event.save
+        render json: event, status: :ok
+      end
 
-    rescue ActiveRecord::RecordNotFound
-    error = ErrorMessage.new("Could not find that Event. Are you using the right event_id?", "The Event was not found!")
-    render json: error, status: :not_found
+    else
+      error = ErrorMessage.new("Could not find that Event. Are you using the right event_id?", "The Event could not be updated. Are you the right user?")
+      render json: error, status: :not_found
+    end
   end
 
   #Tar bort ett event
   def destroy
     event = Event.find(params[:id])
 
-    event.destroy
-    render json: { success: 'The Event was deleted'}, status: :ok
-
-    rescue ActiveRecord::RecordNotFound
-    error = ErrorMessage.new("Could not find that Event. Are you using the right event_id?", "The Event was not found!")
-    render json: error, status: :not_found
-
+    if event.creator_id == @creator_id
+      event.destroy
+      render json: { success: 'The Event was deleted'}, status: :ok
+    else
+      error = ErrorMessage.new("Could not find that Event. Are you using the right event_id?", "The Event could not be deleted. Are you the right user?")
+      render json: error, status: :not_found
+    end
   end
 
   #Denna metod använder sig av geocoder och hjälper till med sökningen nära en specifik position
   def nearby
-
     #Kontrollerar parametrarna
     if params[:long].present? && params[:lat].present?
 
@@ -106,16 +113,20 @@ class Api::EventController < ApplicationController
       error = ErrorMessage.new("Could not find any resources. Bad parameters?", "Could not find any events!" )
       render json: error, status: :bad_request # just json in this example
     end
-
   end
 
   private
   def event_params
-    params.require(:event).permit(:position_id, :description)
+    params.require(:event).permit(:title, :description)
   end
 
   private
   def tag_params
     params.require(:tags).permit(:name)
+  end
+
+  private
+  def position_params
+    params.require(:position).permit(:long, :lat)
   end
 end

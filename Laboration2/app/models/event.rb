@@ -4,13 +4,15 @@ class Event < ActiveRecord::Base
   belongs_to :position
 
   validates :description, presence: true
+  validates :title, presence: true
 
   include Rails.application.routes.url_helpers
 
   def serializable_hash (options={})
     options = {
         # declare what we want to show
-        only: [:id, :creator_id, :position_id, :description, :created_at, :updated_at]
+        include: {:position => {only: [:long, :lat]}, :creator => {only: [:name]}, :tags => {only: [:name]}},
+        only: [:id, :creator_id, :position_id, :title,:description, :created_at, :updated_at]
     }.update(options)
 
     json = super(options)

@@ -53,7 +53,9 @@ module LoginHelper
       auth_header = request.headers['Userkey'].split(' ').last
 
       @token_payload = decodeJWT auth_header.strip
-      if @token_payload
+      if !@token_payload
+        render json: { error: 'The provided token wasn´t correct' }, status: :bad_request
+      else
         @creator_id = @token_payload[0]['creator_id']
       end
     else
@@ -69,7 +71,6 @@ module LoginHelper
 
     #Encode the payload whit the application secret, and a more advanced hash method (skapar header med JWT gem)
     JWT.encode( payload, Rails.application.secrets.secret_key_base, "HS512")
-
   end
 
   #Tar emot och dekrypterar en token
